@@ -1,0 +1,9 @@
+install:
+  - sudo apt-get update
+  - sudo apt-get install qt5-default qttools5-dev-tools
+
+script:
+  - mkdir build
+  - cd build
+  - qmake ../scad/scad.pro
+  - make
