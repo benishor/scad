@@ -2,14 +2,35 @@ dist: trusty
 sudo: required
 language: cpp
 
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "XYE6Jq5lrXs0pPeD3afH+0pg+8HxFy4AAcL+8vBD55BSpFbGRuy6AA57hbRGrBLTF9rWiCcfmrH2Azbru9VC8rxB08AiRWc+GD9WKfj9Xr0M1N5OSLufAY1TlVW9kaSu6aPd4Y9bN0+FHX+St9P0+JsV4lCUNJR/v48JIrOUz5uqDYSfF02Lf7aZEim+/JN5nDC0lsA7AY0zGquTBr8kUIJRYGCv7OfVNjJ7dqR5ycFfETgfeL8Ld+DLXu4kezdWCI4gB0DTcB3b+jwlcesr8X48/HuWYmQiUJxSTpVzm9YcGWwlUOoaPwRi67GsaV1xrPBKoIDLL6AdV+xQHMz+ZVYZTaKatvdWB7zrLLA0VRFSxa0bgfpcqbL+Pe/t6Ytj2cWPU0CNkmAdrkS/yA5QIwNtnJdmht+/Y4J164AwcfqQXaj9U66HcX98Q6K8UWp797LBpCDaHhQcakGxML8Oft0aC7RTfPmEC0srt2w3GkHX9IiOlcKyqLifZioHXMd+8f1cGKL4W2HO6VV6VFTA3OT/h3NFwZyu4anUorUvIbH48sj+KUQSvqU7Lv0pOm2fEz1aMr/OsEcpgH4d2ykya7myP0qCrVuBgIyxv77WLQeyRmHnlmPtf2tNfIC37/m2bB83+MsR+MHCUsdtFtirfgDh+8G1Motr46SNzlJ9Kyw="
+
 before_install:
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
   - sudo apt-get update -qq
   - sudo apt-get install -qq libqt5webkit5-dev qtdeclarative5-dev
   - export QMAKE=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
 script:
+  - if [[ "${COVERITY_SCAN_BRANCH}" == 1 ]];
+      then
+        echo "Don't build on coverty_scan branch.";
+        exit 0;
+    fi
   - mkdir -p build
   - cd build
   - qmake ../scad/scad.pro
   - make
+
+addons:
+  coverity_scan:
+    project:
+      name: "benishor/scad"
+    notification_email: benishor@gmail.com
+    build_command_prepend: "mkdir -p build && cd build && qmake ../scad/scad.pro"
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
