@@ -1,5 +1,6 @@
 dist: trusty
 sudo: required
+language: cpp
 
 before_install:
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
